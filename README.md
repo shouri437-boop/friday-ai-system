@@ -1,4 +1,8 @@
-# 🤖 FRIDAY — Multimodal AI Platform
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Demo-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://friday-ai-platform-five.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shouri437-boop/friday-ai-system)
+
+> 🚀 **Live Vercel Deployment**: [friday-ai-platform-five.vercel.app](https://friday-ai-platform-five.vercel.app)  
+> 🗺️ **Campus AI 3D Navigator**: [friday-ai-platform-five.vercel.app/campus-ai](https://friday-ai-platform-five.vercel.app/campus-ai)
 
 **FRIDAY** is a full-stack, multimodal AI assistant and physical hardware security platform built around an intelligent multi-agent architecture. It brings together a sleek **Next.js 15** web dashboard, a **FastAPI** AI backend, a **4-pass Computer Vision engine**, **live Notion workspace integration**, a **physical RFID hardware authenticator** connected to **AWS IoT Core**, an interactive **3D campus explorer**, and a deep-document **RAG engine**.
 
