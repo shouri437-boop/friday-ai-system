@@ -12,7 +12,7 @@ import { useState } from "react";
 const TITLE_MAP: Record<string, { title: string; subtitle: string }> = {
   "/chat": { title: "Neural Stream", subtitle: "AI Chief of Staff Active" },
   "/vision": { title: "Vision Analytics", subtitle: "YOLO Object Detection & Lens Engine" },
-  "/echo26": { title: "Echo-26 3D Campus", subtitle: "Interactive Campus Spatial Inspector" },
+  "/campus-ai": { title: "Campus AI 3D", subtitle: "Interactive Campus Spatial Inspector & Shortest Path Engine" },
   "/tasks": { title: "Task Workspace", subtitle: "Notion & Internal Task Engine" },
   "/knowledge": { title: "Knowledge Vault", subtitle: "Obsidian Markdown & RAG Embeddings" },
   "/settings": { title: "System Control", subtitle: "API Keys, Models & Preferences" },

@@ -7,11 +7,11 @@ import {
   RefreshCw
 } from "lucide-react";
 
-export default function Echo26Page() {
+export default function CampusAiPage() {
   const [iframeKey, setIframeKey] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const serverUrl = "http://localhost:5500/index.html";
+  const serverUrl = "/campus-ai/index.html";
 
   const handleRefresh = () => {
     setIsLoading(true);
@@ -44,14 +44,14 @@ export default function Echo26Page() {
           </div>
           <div>
             <h1 className="text-xl md:text-2xl font-['Orbitron',sans-serif] font-bold text-[#d9f8ff] tracking-wider flex items-center gap-3">
-              Echo-26 3D Campus Inspector
+              Campus AI — 3D Campus Inspector
               <span className="text-xs font-mono uppercase bg-[#4a1f52]/50 text-[#ffc3ea] border border-[#d688d6]/50 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                PORT 5500 LIVE
+                3D SPATIAL ENGINE LIVE
               </span>
             </h1>
             <p className="text-sm text-[#5c8a93] font-mono">
-              Interactive 3D Three.js Campus Inspector & Navigation Routing Engine
+              Interactive 3D Three.js Campus Spatial Inspector & Dijkstra Shortest Path Navigation Engine
             </p>
           </div>
         </div>
@@ -68,20 +68,20 @@ export default function Echo26Page() {
           <button
             onClick={handleOpenExternal}
             className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#4a1f52] to-[#d688d6] text-[#d9f8ff] font-['Orbitron',sans-serif] font-bold text-xs hover:border-[#ffc3ea] transition-all shadow-[0_0_18px_rgba(255,195,234,0.3)] active:scale-95 cursor-pointer"
-            title="Open in Browser Window"
+            title="Open Full Screen View"
           >
             <ExternalLink className="w-4 h-4" /> Open Full Screen
           </button>
         </div>
       </div>
 
-      {/* Main Viewport Container — Utilizes 100% Full Viewport */}
+      {/* Main Viewport Container */}
       <div className="relative flex-1 w-full rounded-xl border border-[#d688d6]/30 overflow-hidden bg-black shadow-2xl z-10 flex flex-col min-h-0">
         {isLoading && (
           <div className="absolute inset-0 bg-[#05020c]/90 backdrop-blur-md flex flex-col items-center justify-center space-y-3 z-20 pointer-events-none">
             <div className="w-12 h-12 rounded-full border-2 border-[#d688d6]/30 border-t-[#ffc3ea] animate-spin" />
             <span className="text-sm font-['Orbitron',sans-serif] font-bold text-[#ffc3ea] animate-pulse">
-              INITIALIZING ECHO-26 3D THREE.JS ENGINE...
+              INITIALIZING CAMPUS AI 3D THREE.JS SPATIAL ENGINE...
             </span>
           </div>
         )}
@@ -89,7 +89,7 @@ export default function Echo26Page() {
         <iframe
           key={iframeKey}
           src={serverUrl}
-          title="Echo-26 3D Campus Inspector"
+          title="Campus AI — 3D Campus Inspector"
           onLoad={() => setIsLoading(false)}
           className="w-full h-full border-0 bg-black flex-1"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

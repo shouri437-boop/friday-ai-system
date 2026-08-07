@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { name: "Chat", href: "/chat", icon: MessageSquare, badge: "AI Core" },
   { name: "Vision", href: "/vision", icon: Camera, badge: "YOLO / AI" },
-  { name: "Echo-26", href: "/echo26", icon: Compass, badge: "3D Campus" },
+  { name: "Campus AI", href: "/campus-ai", icon: Compass, badge: "3D Campus" },
   { name: "Tasks", href: "/tasks", icon: CheckSquare, badge: "Notion" },
   { name: "Settings", href: "/settings", icon: Settings },
 ];

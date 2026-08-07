@@ -9,6 +9,7 @@
 @source "../types/**/*.{tsx,ts,js}";
 @source not "../ragflow/**";
 @source not "../Echo-26/**";
+@source not "../public/campus-ai/**";
 @source not "../hackathon/**";
 
 :root {
