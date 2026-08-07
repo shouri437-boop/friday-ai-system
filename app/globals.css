@@ -1,6 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Restrict Tailwind scanning to Next.js source only — exclude ragflow, Echo-26 */
+@source "../app/**/*.{tsx,ts,jsx,js}";
+@source "../components/**/*.{tsx,ts,jsx,js}";
+@source "../lib/**/*.{tsx,ts,js}";
+@source "../hooks/**/*.{tsx,ts,js}";
+@source "../types/**/*.{tsx,ts,js}";
+@source not "../ragflow/**";
+@source not "../Echo-26/**";
+@source not "../hackathon/**";
+
 :root {
   --bg: #05020c;
   --bg-card: rgba(30, 14, 42, 0.55);
