@@ -131,9 +131,28 @@ This creates a real-time physical + cloud intrusion detection system — an unau
 
 ---
 
-## 🌐 3D Campus Explorer — Echo-26
+## 🗺️ Campus AI — 3D Interactive Campus Navigator
 
-Echo-26 is an interactive **Three.js + GSAP 3D spatial visualization engine** integrated into the FRIDAY dashboard. It renders a fully navigable 3D model of a campus environment, including floor-by-floor data, routing overlays, and a built-in AI chatbot for campus queries.
+**Campus AI** is a fully interactive **3D campus visualization and intelligent routing engine** embedded directly into the FRIDAY dashboard. Built with **Three.js** for 3D rendering and **GSAP** for smooth animations, it transforms a static campus map into a living, explorable environment.
+
+### Navigating the Campus
+Users can move freely through a rendered 3D model of the campus, explore individual buildings, switch between floors, and get contextual information about rooms, labs, departments, and facilities — all without leaving the FRIDAY dashboard.
+
+### Dijkstra's Shortest Path Algorithm
+The most powerful feature of Campus AI is its **intelligent routing engine**, which uses **Dijkstra's Algorithm** to calculate the shortest walking path between any two locations on campus.
+
+Here's how it works in plain terms:
+
+- The entire campus is modelled as a **graph** — every junction, corridor, staircase, entrance, and landmark is a **node**, and every walkable connection between them is an **edge** with a distance weight.
+- When you ask *"How do I get from the library to the computer science lab?"*, Campus AI treats that as a graph problem: find the cheapest (shortest) path from node A to node B.
+- Dijkstra's Algorithm starts at your **source node** and explores all neighbouring nodes, always picking the next closest unvisited one. It keeps a running tally of the shortest known distance to every node it visits, updating it if it finds a shorter route.
+- This continues until it reaches your **destination node**, at which point it traces back through the recorded shortest distances to reconstruct the optimal path.
+- The result is highlighted as a **glowing overlay route** directly on the 3D campus model, showing you exactly which corridors to take, which stairs to use, and how many steps the journey is.
+
+This means Campus AI doesn't just show you where things are — it tells you the **most efficient way to get there**, accounting for the actual physical layout and connectivity of the campus.
+
+### AI Chatbot Integration
+Campus AI also includes a built-in chatbot that understands natural language campus queries — *"Where is the examination hall?"*, *"Which floor is the dean's office on?"*, *"Find the nearest canteen from Block C"* — and responds with both a text answer and a live route overlay on the 3D map.
 
 ---
 
