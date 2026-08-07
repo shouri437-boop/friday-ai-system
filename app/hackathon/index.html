@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:rgba(30,41,59,0.75);
+    --border:rgba(255,255,255,0.1);
+    --accent:#22d3ee;
+    --accent2:#8b5cf6;
+    --text:#f8fafc;
+    --muted:#94a3b8;
+    --danger:#ef4444;
+    --success:#10b981;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+  body{
+    background:radial-gradient(circle at top, #1e1b4b 0%, #0f172a 60%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:1.5rem 1rem 3rem;
+  }
+  .app{width:100%;max-width:480px;}
+  header{text-align:center;margin-bottom:1.25rem;}
+  header h1{
+    font-size:1.6rem;font-weight:800;
+    background:linear-gradient(to right,#22d3ee,#8b5cf6);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  header p{color:var(--muted);font-size:0.85rem;margin-top:0.25rem;}
+
+  .camera-card{
+    position:relative;
+    background:#000;
+    border-radius:20px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    aspect-ratio:3/4;
+    box-shadow:0 20px 40px -12px rgba(0,0,0,0.6);
+  }
+  video, #capturedImg{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  #capturedImg{display:none;}
+  .scan-frame{
+    position:absolute;inset:8%;
+    border:2px dashed rgba(34,211,238,0.5);
+    border-radius:16px;
+    pointer-events:none;
+  }
+  .cam-hint{
+    position:absolute;bottom:10px;left:0;right:0;
+    text-align:center;color:rgba(255,255,255,0.75);
+    font-size:0.78rem;pointer-events:none;
+  }
+  .cam-error{
+    display:none;position:absolute;inset:0;
+    background:rgba(15,23,42,0.95);
+    flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:1.5rem;gap:0.5rem;
+  }
+
+  .controls{display:flex;gap:0.75rem;margin-top:1rem;}
+  button{
+    border:none;border-radius:14px;cursor:pointer;
+    font-family:inherit;font-weight:600;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  button:active{transform:scale(0.97);}
+  button:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+  #captureBtn{
+    flex:1;padding:1rem;font-size:1rem;
+    background:linear-gradient(135deg,var(--accent2),var(--accent));
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;gap:0.5rem;
+  }
+  #retakeBtn{
+    display:none;flex:1;padding:1rem;font-size:0.95rem;
+    background:rgba(255,255,255,0.08);color:var(--text);
+    border:1px solid var(--border);
+  }
+
+  .spinner{
+    width:18px;height:18px;border:3px solid rgba(255,255,255,0.3);
+    border-top-color:#fff;border-radius:50%;
+    animation:spin .8s linear infinite;display:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .error-banner{
+    display:none;margin-top:1rem;padding:0.9rem 1rem;
+    background:rgba(239,68,68,0.15);border:1px solid var(--danger);
+    color:#fca5a5;border-radius:12px;font-size:0.88rem;line-height:1.4;
+  }
+
+  .result{
+    display:none;margin-top:1.25rem;
+    background:var(--panel);backdrop-filter:blur(12px);
+    border:1px solid var(--border);border-radius:18px;padding:1.25rem;
+  }
+  .result-badge{
+    display:inline-block;font-size:0.7rem;font-weight:700;
+    letter-spacing:0.05em;text-transform:uppercase;
+    padding:0.25rem 0.65rem;border-radius:20px;
+    background:rgba(16,185,129,0.15);color:#34d399;
+    border:1px solid rgba(16,185,129,0.35);margin-bottom:0.75rem;
+  }
+  .book-title{font-size:1.3rem;font-weight:800;line-height:1.25;}
+  .book-author{color:var(--muted);font-size:0.9rem;margin-top:0.2rem;}
+  .book-subject{
+    display:inline-block;margin-top:0.6rem;font-size:0.75rem;
+    color:#c4b5fd;background:rgba(139,92,246,0.15);
+    border:1px solid rgba(139,92,246,0.3);
+    padding:0.25rem 0.6rem;border-radius:8px;
+  }
+
+  .section{margin-top:1rem;}
+  .section h4{
+    font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--muted);margin-bottom:0.4rem;
+  }
+  .section p{font-size:0.92rem;line-height:1.55;color:#e2e8f0;}
+  .topics{list-style:none;display:flex;flex-wrap:wrap;gap:0.4rem;}
+  .topics li{
+    font-size:0.82rem;background:rgba(6,182,212,0.12);
+    color:#67e8f9;border:1px solid rgba(6,182,212,0.3);
+    padding:0.3rem 0.65rem;border-radius:10px;
+  }
+
+  .apikey-toggle{
+    text-align:center;margin-top:1rem;font-size:0.78rem;color:var(--muted);
+    cursor:pointer;text-decoration:underline;
+  }
+  .apikey-box{display:none;margin-top:0.6rem;}
+  .apikey-box input{
+    width:100%;padding:0.7rem 0.9rem;border-radius:10px;
+    background:rgba(15,23,42,0.6);border:1px solid var(--border);
+    color:#fff;font-size:0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>📖 Book Scanner</h1>
+    <p>Hold a book up to the camera and capture the cover</p>
+  </header>
+
+  <div class="camera-card" id="cameraCard">
+    <video id="video" autoplay playsinline muted></video>
+    <img id="capturedImg" alt="Captured photo">
+    <div class="scan-frame" id="scanFrame"></div>
+    <p class="cam-hint" id="camHint">Center the book cover in frame</p>
+    <div class="cam-error" id="camError">
+      <p style="font-weight:600;">Camera unavailable</p>
+      <p style="color:var(--muted);font-size:0.85rem;" id="camErrorMsg">
+        Allow camera access in your browser settings and reload.
+      </p>
+    </div>
+  </div>
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <div class="controls">
+    <button id="captureBtn">
+      <div class="spinner" id="spinner"></div>
+      <span id="captureBtnText">📸 Capture & Identify</span>
+    </button>
+    <button id="retakeBtn">Retake</button>
+  </div>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div class="result" id="result">
+    <span class="result-badge" id="resultBadge">Identified</span>
+    <div class="book-title" id="resTitle">-</div>
+    <div class="book-author" id="resAuthor">-</div>
+    <span class="book-subject" id="resSubject">-</span>
+
+    <div class="section">
+      <h4>What it's about</h4>
+      <p id="resSummary">-</p>
+    </div>
+
+    <div class="section">
+      <h4>Key topics</h4>
+      <ul class="topics" id="resTopics"></ul>
+    </div>
+
+    <div class="section">
+      <h4>Who it's useful for</h4>
+      <p id="resUsefulFor">-</p>
+    </div>
+
+    <div class="section">
+      <h4>Helpful background</h4>
+      <p id="resPrereq">-</p>
+    </div>
+  </div>
+
+  <p class="apikey-toggle" id="apikeyToggle">Set Gemini API key</p>
+  <div class="apikey-box" id="apikeyBox">
+    <input type="password" id="apiKey" placeholder="AIzaSy... (leave blank if set on the server)">
+  </div>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const capturedImg = document.getElementById('capturedImg');
+const canvas = document.getElementById('canvas');
+const scanFrame = document.getElementById('scanFrame');
+const camHint = document.getElementById('camHint');
+const camError = document.getElementById('camError');
+const camErrorMsg = document.getElementById('camErrorMsg');
+const captureBtn = document.getElementById('captureBtn');
+const captureBtnText = document.getElementById('captureBtnText');
+const retakeBtn = document.getElementById('retakeBtn');
+const spinner = document.getElementById('spinner');
+const errorBanner = document.getElementById('errorBanner');
+const result = document.getElementById('result');
+const apikeyToggle = document.getElementById('apikeyToggle');
+const apikeyBox = document.getElementById('apikeyBox');
+
+const BACKEND_URL = 'http://127.0.0.1:8000/identify-book';
+
+let stream = null;
+let capturedBlob = null;
+let mode = 'live'; // 'live' | 'captured'
+
+apikeyToggle.addEventListener('click', () => {
+  apikeyBox.style.display = apikeyBox.style.display === 'block' ? 'none' : 'block';
+});
+
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1280 } },
+      audio: false
+    });
+    video.srcObject = stream;
+    camError.style.display = 'none';
+  } catch (err) {
+    camError.style.display = 'flex';
+    camErrorMsg.textContent = err.name === 'NotAllowedError'
+      ? 'Camera permission was denied. Allow access in your browser settings and reload.'
+      : 'Could not access the camera on this device.';
+  }
+}
+startCamera();
+
+function setLiveMode() {
+  mode = 'live';
+  video.style.display = 'block';
+  capturedImg.style.display = 'none';
+  scanFrame.style.display = 'block';
+  camHint.style.display = 'block';
+  retakeBtn.style.display = 'none';
+  captureBtnText.textContent = '📸 Capture & Identify';
+  errorBanner.style.display = 'none';
+  result.style.display = 'none';
+}
+
+function setCapturedMode(dataUrl) {
+  mode = 'captured';
+  capturedImg.src = dataUrl;
+  video.style.display = 'none';
+  capturedImg.style.display = 'block';
+  scanFrame.style.display = 'none';
+  camHint.style.display = 'none';
+  retakeBtn.style.display = 'block';
+}
+
+retakeBtn.addEventListener('click', setLiveMode);
+
+captureBtn.addEventListener('click', async () => {
+  if (mode === 'live') {
+    // Capture the current video frame
+    const w = video.videoWidth || 720;
+    const h = video.videoHeight || 960;
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    setCapturedMode(dataUrl);
+
+    canvas.toBlob(async (blob) => {
+      capturedBlob = blob;
+      await identifyBook(blob);
+    }, 'image/jpeg', 0.92);
+  } else {
+    // Already have an image showing results; capture button re-scans same shot
+    if (capturedBlob) await identifyBook(capturedBlob);
+  }
+});
+
+async function identifyBook(blob) {
+  errorBanner.style.display = 'none';
+  result.style.display = 'none';
+  captureBtn.disabled = true;
+  spinner.style.display = 'block';
+  captureBtnText.textContent = 'Reading cover...';
+
+  const formData = new FormData();
+  formData.append('file', blob, 'capture.jpg');
+
+  const headers = {};
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (apiKey) headers['X-API-Key'] = apiKey;
+
+  try {
+    const response = await fetch(BACKEND_URL, { method: 'POST', headers, body: formData });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Could not identify the book.');
+    }
+
+    if (!data.book_found) {
+      showError("Couldn't spot a book in that shot. Make sure the cover is well-lit and fills the frame, then try again.");
+      return;
+    }
+
+    document.getElementById('resTitle').textContent = data.title || 'Unknown title';
+    document.getElementById('resAuthor').textContent = data.author ? `by ${data.author}` : '';
+    document.getElementById('resSubject').textContent = data.subject_area || '';
+    document.getElementById('resSummary').textContent = data.summary || '-';
+    document.getElementById('resUsefulFor').textContent = data.useful_for || '-';
+    document.getElementById('resPrereq').textContent = data.prerequisites || '-';
+
+    const topicsEl = document.getElementById('resTopics');
+    topicsEl.innerHTML = '';
+    (data.key_topics || []).forEach(t => {
+      const li = document.createElement('li');
+      li.textContent = t;
+      topicsEl.appendChild(li);
+    });
+
+    result.style.display = 'block';
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    captureBtn.disabled = false;
+    spinner.style.display = 'none';
+    captureBtnText.textContent = '🔁 Scan Again';
+  }
+}
+
+function showError(msg) {
+  errorBanner.textContent = msg;
+  errorBanner.style.display = 'block';
+}
+</script>
+</body>
+</html>

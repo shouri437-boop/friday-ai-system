@@ -1,0 +1,4 @@
+.env
+chat-config.js
+server-error.log
+*.zip

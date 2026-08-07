@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNRVJIET 3D Campus Procedural Inspector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay Wrapper -->
+    <div id="ui-overlay">
+        <!-- Sci-Fi Glassmorphic Header -->
+        <header class="system-header">
+            <div class="logo">
+                <i class="fa-solid fa-microchip pulse-icon"></i>
+                <span>VNRVJIET CAMPUS</span>
+            </div>
+            <div class="system-status">
+                <button id="btn-hardware-serial-header" class="hardware-header-btn">
+                    <i class="fa-solid fa-microchip"></i> ESP32 HARDWARE
+                </button>
+                <button id="btn-return-macro" class="macro-return-btn hidden">
+                    <i class="fa-solid fa-arrow-left"></i> RETURN TO CAMPUS VIEW
+                </button>
+                <button id="btn-toggle-hud" class="hud-toggle-btn">
+                    <i class="fa-solid fa-bars" id="hud-toggle-icon"></i>
+                    <span id="hud-toggle-text">MENU</span>
+                </button>
+                <span class="status-indicator online"></span>
+                <span class="status-text">SYS_ONLINE // VNRVJIET_CAMPUS // SECURE</span>
+            </div>
+        </header>
+
+        <!-- Sidebar Dashboard — RIGHT side, 1/4 width -->
+        <aside class="sidebar">
+            <!-- Sidebar close button -->
+            <div class="sidebar-close-row">
+                <button id="btn-close-sidebar" class="sidebar-close-btn" title="Close Menu">
+                    <i class="fa-solid fa-xmark"></i> CLOSE MENU
+                </button>
+            </div>
+
+            <!-- Facility Overview stats -->
+            <div class="sidebar-section">
+                <h2><i class="fa-solid fa-server"></i> FACILITY OVERVIEW</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">ACTIVE SECTOR</span>
+                        <span class="stat-val font-orbitron" id="active-sector-display">--</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">ACTIVE LEVEL</span>
+                        <span class="stat-val font-orbitron" id="current-level-display">LEVEL_01</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">TOTAL ROOMS</span>
+                        <span class="stat-val font-orbitron" id="total-rooms-display">-- / --</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block Selector Dropdown -->
+            <div class="sidebar-section">
+                <h2><i class="fa-solid fa-building"></i> SELECT BLOCK</h2>
+                <div class="block-dropdown-panel">
+                    <button class="block-dropdown-btn" id="block-dropdown-toggle">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span id="block-dropdown-label">-- Choose a Block --</span>
+                        <i class="fa-solid fa-chevron-down" id="block-dropdown-chevron"></i>
+                    </button>
+                    <div class="block-dropdown-menu hidden" id="block-dropdown-menu">
+                        <button class="block-option-btn" data-sector="B-BLOCK" id="sector-b-block">
+                            <i class="fa-solid fa-cube"></i> B-BLOCK
+                        </button>
+                        <button class="block-option-btn" data-sector="PG-BLOCK" id="sector-pg-block">
+                            <i class="fa-solid fa-graduation-cap"></i> PG-BLOCK
+                        </button>
+                        <button class="block-option-btn" data-sector="D-BLOCK" id="sector-d-block">
+                            <i class="fa-solid fa-building-user"></i> D-BLOCK
+                        </button>
+                        <button class="block-option-btn" data-sector="E-BLOCK" id="sector-e-block">
+                            <i class="fa-solid fa-layer-group"></i> E-BLOCK
+                        </button>
+                        <button class="block-option-btn" data-sector="C-BLOCK" id="sector-c-block">
+                            <i class="fa-solid fa-city"></i> C-BLOCK
+                        </button>
+                        <button class="block-option-btn" data-sector="A-BLOCK" id="sector-a-block">
+                            <i class="fa-solid fa-building"></i> A-BLOCK
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Selector -->
+            <div class="sidebar-section" id="level-selector-section" style="display:none">
+                <h2><i class="fa-solid fa-layer-group"></i> LEVEL SELECTOR</h2>
+                <div class="floor-selector-panel">
+                    <button class="floor-btn active" data-floor="1">FLR 1</button>
+                    <button class="floor-btn" data-floor="2">FLR 2</button>
+                    <button class="floor-btn" data-floor="3">FLR 3</button>
+                    <button class="floor-btn" data-floor="4">FLR 4</button>
+                    <button class="floor-btn" data-floor="5">FLR 5</button>
+                </div>
+                <div class="isolation-control">
+                    <label class="toggle-container">
+                        <input type="checkbox" id="isolation-toggle">
+                        <span class="checkmark"></span>
+                        ISOLATE ACTIVE LEVEL
+                    </label>
+                </div>
+            </div>
+
+            <!-- ── Hardware Integration Section ──────────────────────────── -->
+            <div class="sidebar-section" id="hardware-section">
+                <h2><i class="fa-solid fa-microchip"></i> ESP32 HARDWARE MONITOR</h2>
+                <div class="hardware-card">
+                    <div class="hw-status-row">
+                        <span class="hw-status-dot disconnected" id="hw-status-dot"></span>
+                        <span class="hw-status-text" id="hw-status-text">SERIAL: DISCONNECTED</span>
+                    </div>
+                    <p class="hw-log-preview" id="hw-log-preview">Awaiting ESP32 Serial Logs (115200 Baud)...</p>
+                    <div class="hw-btn-group">
+                        <button id="btn-connect-serial" class="hw-action-btn connect-btn">
+                            <i class="fa-solid fa-plug"></i> CONNECT ESP32
+                        </button>
+                        <button id="btn-simulate-fire" class="hw-action-btn simulate-btn" title="Simulate Arduino Serial Log Fire Signal">
+                            <i class="fa-solid fa-fire-flame-curved"></i> SIMULATE FIRE
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Route Finder Section ────────────────────────────────────── -->
+            <div class="sidebar-section" id="route-finder-section">
+                <h2>
+                    <i class="fa-solid fa-route"></i> ROUTE FINDER
+                    <button id="btn-toggle-router" class="router-toggle-btn" title="Collapse / Expand">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </h2>
+
+                <div id="route-finder-body">
+                    <!-- FROM -->
+                    <div class="route-input-group">
+                        <label class="route-label">
+                            <i class="fa-solid fa-location-dot" style="color:#00f0ff"></i> FROM
+                        </label>
+                        <select id="route-from" class="route-select">
+                            <option>Initializing graph...</option>
+                        </select>
+                    </div>
+
+                    <!-- SWAP -->
+                    <div class="route-swap-row">
+                        <div class="route-arrow-line"></div>
+                        <button id="btn-swap-route" class="route-swap-btn" title="Swap FROM and TO">
+                            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                        </button>
+                        <div class="route-arrow-line"></div>
+                    </div>
+
+                    <!-- TO -->
+                    <div class="route-input-group">
+                        <label class="route-label">
+                            <i class="fa-solid fa-flag-checkered" style="color:#ff9e00"></i> TO
+                        </label>
+                        <select id="route-to" class="route-select">
+                            <option>Initializing graph...</option>
+                        </select>
+                    </div>
+
+                    <!-- HAZARD ZONES -->
+                    <div class="route-hazard-section">
+                        <label class="route-label hazard-label">
+                            <i class="fa-solid fa-triangle-exclamation"></i> HAZARD ZONES
+                            <span class="hazard-hint">Blocked during routing</span>
+                        </label>
+                        <div class="hazard-input-row">
+                            <select id="hazard-node-select" class="route-select">
+                                <option value="">Select a node to block...</option>
+                            </select>
+                            <button id="btn-add-hazard" class="hazard-add-btn" title="Add hazard">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="hazard-list" class="hazard-tags-list"></div>
+                        <button id="btn-clear-hazards" class="hazard-clear-btn">
+                            <i class="fa-solid fa-trash-can"></i> CLEAR USER HAZARDS
+                        </button>
+                    </div>
+
+                    <!-- FIND ROUTE BUTTON -->
+                    <button id="btn-find-route" class="find-route-btn">
+                        <i class="fa-solid fa-magnifying-glass-location"></i>
+                        FIND SHORTEST ROUTE
+                    </button>
+
+                    <!-- CLEAR 3D PATH -->
+                    <button id="btn-clear-path" class="clear-path-btn">
+                        <i class="fa-solid fa-eraser"></i> CLEAR 3D PATH
+                    </button>
+
+                    <!-- ROUTE RESULT -->
+                    <div id="route-result" class="route-result hidden"></div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>CAMPUS BUILDING INSPECTOR v2.0.0</p>
+            </div>
+        </aside>
+
+        <!-- Room HUD HTML Labels Container (Dynamically Projected) -->
+        <div id="hud-labels-container"></div>
+    </div>
+
+    <!-- Interactive Transition Screen Overlays -->
+    <div id="transition-overlay" class="hidden-overlay">
+        <div class="transition-message">
+            <h1 id="transition-title" class="font-orbitron">SWITCHING SECTORS</h1>
+            <p id="transition-subtitle">ESTABLISHING VIRTUAL NETWORK LINK...</p>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hardware Emergency Alert Modal -->
+    <div id="hardware-alert-modal" class="alert-modal-overlay hidden">
+        <div class="alert-modal-box">
+            <div class="alert-modal-badge font-orbitron">
+                <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> CRITICAL FIRE HAZARD DETECTED
+            </div>
+            <div class="alert-modal-body">
+                <h2 class="alert-modal-title">SERIAL LOG DETECTED FIRE</h2>
+                <p class="alert-modal-msg">closing all b block floors,,,do you want to proceed</p>
+            </div>
+            <div class="alert-modal-actions">
+                <button id="modal-btn-yes" class="modal-act-btn btn-yes">
+                    <i class="fa-solid fa-check"></i> YES (PROCEED)
+                </button>
+                <button id="modal-btn-no" class="modal-act-btn btn-no">
+                    <i class="fa-solid fa-xmark"></i> NO (IGNORE)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Campus Assistant -->
+    <div id="chatbot-root">
+        <button id="chatbot-toggle" class="chatbot-fab" title="Open Campus AI Assistant">
+            <i class="fa-solid fa-comments"></i>
+            <span class="chatbot-fab-label font-orbitron">CAMPUS AI</span>
+        </button>
+
+        <div id="chatbot-panel" class="chatbot-panel glass-panel">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <i class="fa-solid fa-robot pulse-icon"></i>
+                    <div>
+                        <span class="font-orbitron">CAMPUS-AI</span>
+                        <small id="chatbot-status">ONLINE // FEATHERLESS AI</small>
+                    </div>
+                </div>
+                <button id="chatbot-close" class="chatbot-close-btn" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="chatbot-messages" class="chatbot-messages"></div>
+
+            <form id="chatbot-form" class="chatbot-form">
+                <textarea id="chatbot-input" rows="1" placeholder="Ask about blocks, routes, floors..." maxlength="2000"></textarea>
+                <button type="button" id="chatbot-voice" class="chatbot-voice-btn" title="Speak your question" aria-label="Speak your question">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button type="submit" id="chatbot-send" class="chatbot-send-btn" title="Send">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Local Vendor Scripts (Offline & Online support) -->
+    <script src="three.min.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="gsap.min.js"></script>
+    <!-- Application Logic -->
+    <script src="chat-config.js?v=1.0.0"></script>
+    <script src="main.js?v=10.1.1"></script>
+    <script src="routing.js?v=10.2.0"></script>
+    <script src="chatbot.js?v=1.1.0"></script>
+</body>
+</html>

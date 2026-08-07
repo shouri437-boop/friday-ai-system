@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Python Virtual Environments & Caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+venv/
+**/venv/
+.venv/
+**/.venv/
+*.so
+.Python
+
+# Next.js & Build Outputs
+.next/
+/.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+!backend/.env.example
+secrets.h
+**/secrets.h
+chat-config.js
+**/chat-config.js
+
+# Keys & Certificates
+*.pem
+*.crt
+*.key
+*.pub
+*.pfx
+*.p12
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing & Logs
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

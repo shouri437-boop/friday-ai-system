@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>F.R.I.D.A.Y — Authentication</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cyan: #ffc3ea;
+    --cyan-soft: #d688d6;
+    --cyan-dim: #4a1f52;
+    --cyan-glow: rgba(255, 195, 234, 0.35);
+    --text: #d9f8ff;
+    --text-dim: #5c8a93;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html, body {
+    width:100%; height:100%;
+    background:
+      radial-gradient(ellipse at 50% 32%, #1f0a2e 0%, #12071f 42%, #050210 75%, #000000 100%),
+      radial-gradient(ellipse at 85% 92%, rgba(30,22,95,0.45) 0%, transparent 55%),
+      radial-gradient(ellipse at 8% 88%, rgba(74,20,70,0.4) 0%, transparent 55%);
+    background-color: #05020c;
+    overflow:hidden;
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text);
+  }
+
+  #bg-grid{
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(214,136,214,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(214,136,214,0.045) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0.9) 0%, transparent 68%);
+    pointer-events:none;
+  }
+
+  #sprinkle-canvas{
+    position:fixed; inset:0;
+    display:block;
+    pointer-events:none;
+    z-index:2;
+  }
+
+  .bracket{
+    position:fixed;
+    width: 34px; height: 34px;
+    border: 1px solid rgba(214,136,214,0.32);
+    z-index:6;
+    pointer-events:none;
+  }
+  .bracket.tl{ top:16px; left:16px; border-right:none; border-bottom:none; }
+  .bracket.tr{ top:16px; right:16px; border-left:none; border-bottom:none; }
+  .bracket.bl{ bottom:16px; left:16px; border-right:none; border-top:none; }
+  .bracket.br{ bottom:16px; right:16px; border-left:none; border-top:none; }
+
+  .chrome{
+    position:fixed;
+    font-family:'Rajdhani', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    z-index:6;
+    pointer-events:none;
+    user-select:none;
+  }
+  .chrome b{ color: var(--cyan-soft); font-weight:600; }
+  .chrome.tl{ top: 24px; left: 26px; }
+  .chrome.tr{ top: 24px; right: 26px; text-align:right; }
+
+  /* ---------- login panel ---------- */
+  .stage{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    z-index:5;
+    pointer-events:none;
+    perspective: 1200px;
+  }
+
+  .login-card{
+    pointer-events:auto;
+    width: min(380px, 88vw);
+    padding: 2.6rem 2.4rem 2.8rem;
+    border: 1px solid rgba(214,136,214,0.28);
+    border-radius: 18px;
+    background: linear-gradient(155deg, rgba(30,14,42,0.55), rgba(6,10,18,0.6));
+    backdrop-filter: blur(10px);
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.55),
+      0 0 50px rgba(140,50,160,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 0 40px rgba(214,136,214,0.05);
+    transform-style: preserve-3d;
+    transform: rotateX(0deg) rotateY(0deg);
+    transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+    animation: fadeIn 0.8s ease;
+  }
+
+  @keyframes fadeIn{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .login-head{
+    text-align:center;
+    margin-bottom: 2rem;
+  }
+
+  .login-head .core-label{
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    letter-spacing: 0.4em;
+    color: var(--text);
+    text-shadow: 0 0 18px var(--cyan-glow), 0 0 44px rgba(198,110,220,0.22);
+    margin-left: 0.4em;
+  }
+
+  .login-head .core-sub{
+    margin-top: 0.7rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    color: var(--text-dim);
+    font-weight:600;
+  }
+
+  .field{
+    margin-bottom: 1.4rem;
+  }
+
+  .field label{
+    display:block;
+    font-family:'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    color: var(--cyan-soft);
+    opacity:0.85;
+    margin-bottom: 0.5rem;
+  }
+
+  .field input{
+    width:100%;
+    padding: 0.75rem 0.9rem;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 8px;
+    color: var(--text);
+    font-family:'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    outline:none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .field input::placeholder{
+    color: rgba(217,248,255,0.28);
+  }
+
+  .field input:focus{
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(255,195,234,0.18), inset 0 0 10px rgba(214,136,214,0.1);
+  }
+
+  .login-btn{
+    width:100%;
+    margin-top: 0.6rem;
+    padding: 0.85rem;
+    border: 1px solid var(--cyan-dim);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(20,60,70,0.35), rgba(5,16,20,0.35));
+    color: var(--text);
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    font-size: 0.75rem;
+    letter-spacing: 0.24em;
+    cursor:pointer;
+    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+  }
+
+  .login-btn:hover{
+    border-color: var(--cyan);
+    background: linear-gradient(180deg, rgba(20,60,70,0.6), rgba(5,16,20,0.6));
+    box-shadow: 0 0 24px rgba(255,195,234,0.22), inset 0 0 16px rgba(214,136,214,0.1);
+  }
+
+  .login-btn:active{ transform: translateY(1px); }
+
+  .status-line{
+    margin-top: 1.1rem;
+    text-align:center;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    min-height: 1em;
+    transition: opacity 0.3s ease;
+  }
+
+  .status-line.granted{
+    color: var(--cyan-soft);
+    text-shadow: 0 0 10px var(--cyan-glow);
+  }
+</style>
+</head>
+<body>
+
+  <div id="bg-grid"></div>
+  <canvas id="sprinkle-canvas"></canvas>
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+
+  <div class="chrome tl">F.R.I.D.A.Y <b>OS</b><br>BUILD 4.6.0</div>
+  <div class="chrome tr" id="clock">00:00:00<br><span style="opacity:0.6">SYS. <b>STANDBY</b></span></div>
+
+  <div class="stage">
+    <div class="login-card">
+      <div class="login-head">
+        <div class="core-label">FRIDAY</div>
+        <div class="core-sub">IDENTITY VERIFICATION REQUIRED</div>
+      </div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="field">
+          <label for="username">USERNAME</label>
+          <input type="text" id="username" placeholder="ENTER USERNAME" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="password">PASSWORD</label>
+          <input type="password" id="password" placeholder="ENTER PASSWORD" autocomplete="off">
+        </div>
+        <button type="submit" class="login-btn">INITIALIZE ACCESS</button>
+        <div class="status-line" id="status-line"></div>
+      </form>
+    </div>
+  </div>
+
+<script>
+  // ---------------- floating sprinkle waves ----------------
+  const sCanvas = document.getElementById('sprinkle-canvas');
+  const sCtx = sCanvas.getContext('2d');
+  let sw, sh;
+
+  function resizeSprinkles(){
+    sw = sCanvas.width = window.innerWidth;
+    sh = sCanvas.height = window.innerHeight;
+  }
+  resizeSprinkles();
+  window.addEventListener('resize', resizeSprinkles);
+
+  const SPRINKLE_COUNT = Math.round((window.innerWidth * window.innerHeight) / 3200);
+  const sprinkles = [];
+
+  for (let i = 0; i < SPRINKLE_COUNT; i++){
+    const depth = Math.random(); // 0 = far, 1 = near
+    sprinkles.push({
+      x: Math.random() * sw,
+      y: Math.random() * sh,
+      baseY: Math.random() * sh,
+      depth: depth,
+      r: 0.5 + depth * 2.6,
+      speed: (0.1 + depth * 0.5),
+      waveAmp: 6 + Math.random() * 26,
+      waveFreq: 0.3 + Math.random() * 0.9,
+      phase: Math.random() * Math.PI * 2,
+      alpha: 0.35 + depth * 0.55,
+      hueShift: Math.random()
+    });
+  }
+
+  function drawSprinkles(t){
+    sCtx.clearRect(0, 0, sw, sh);
+    for (let i = 0; i < sprinkles.length; i++){
+      const p = sprinkles[i];
+
+      // gentle horizontal drift, wraps around
+      p.x += p.speed * 0.5;
+      if (p.x > sw + 10) p.x = -10;
+
+      // vertical wave motion
+      const y = p.baseY + Math.sin(t * p.waveFreq + p.phase) * p.waveAmp;
+
+      const flicker = 0.7 + Math.sin(t * 1.4 + p.phase * 2) * 0.3;
+      const light = 80 + p.hueShift * 16;
+      const blur = (1 - p.depth) * 3 + 3;
+
+      sCtx.beginPath();
+      sCtx.arc(p.x, y, p.r, 0, Math.PI * 2);
+      sCtx.fillStyle = `hsla(330, 50%, ${light}%, ${Math.min(p.alpha * flicker, 1)})`;
+      sCtx.shadowColor = 'rgba(255,195,234,0.75)';
+      sCtx.shadowBlur = blur + p.depth * 5;
+      sCtx.fill();
+    }
+  }
+
+  function animateSprinkles(now){
+    drawSprinkles(now * 0.001);
+    requestAnimationFrame(animateSprinkles);
+  }
+  requestAnimationFrame(animateSprinkles);
+
+  const clockEl = document.getElementById('clock');
+  function tickClock(){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const ss = String(now.getSeconds()).padStart(2,'0');
+    clockEl.innerHTML = `${hh}:${mm}:${ss}<br><span style="opacity:0.6">SYS. <b>STANDBY</b></span>`;
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // ---------------- 3D tilt on login card ----------------
+  const loginCard = document.querySelector('.login-card');
+  const stageEl = document.querySelector('.stage');
+
+  document.addEventListener('mousemove', (e) => {
+    const rect = loginCard.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    const rotY = Math.max(Math.min(dx * 8, 8), -8);
+    const rotX = Math.max(Math.min(-dy * 8, 8), -8);
+    loginCard.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  });
+
+  document.addEventListener('mouseleave', () => {
+    loginCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
+  });
+
+  const form = document.getElementById('login-form');
+  const statusLine = document.getElementById('status-line');
+  const btn = form.querySelector('.login-btn');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+
+    if (!user || !pass){
+      statusLine.textContent = 'ENTER BOTH FIELDS TO PROCEED';
+      statusLine.classList.remove('granted');
+      return;
+    }
+
+    btn.textContent = 'VERIFYING...';
+    statusLine.textContent = 'AUTHENTICATING CREDENTIALS';
+    statusLine.classList.remove('granted');
+
+    // Accepts any username/password for now
+    setTimeout(() => {
+      statusLine.textContent = 'ACCESS GRANTED';
+      statusLine.classList.add('granted');
+      setTimeout(() => {
+        window.location.href = 'friday.html';
+      }, 500);
+    }, 700);
+  });
+</script>
+</body>
+</html>
